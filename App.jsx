@@ -1,17 +1,11 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
 import {SafeAreaView, StyleSheet, useColorScheme} from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {WebSocketTest} from './src/components/WebSocketTest';
+import {UserProvider} from './src/state/UserContext';
+import MainRoute from './src/routes.jsx/MainRoute';
 
-function App(): JSX.Element {
+const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -20,10 +14,12 @@ function App(): JSX.Element {
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <WebSocketTest />
+      <UserProvider>
+        <MainRoute />
+      </UserProvider>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({});
 
