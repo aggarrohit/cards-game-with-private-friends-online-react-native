@@ -13,11 +13,12 @@ export const InputView = ({
 }) => {
   return (
     <View style={{marginBottom: 50}}>
-      <Text>{title}</Text>
+      <Text style={{color: 'white'}}>{title}</Text>
       <TextInput
         value={value}
         onChangeText={setValue}
         placeholder={placeholder}
+        placeholderTextColor={'gray'}
         style={styles.inputField}
         inputMode={inputMode}
         maxLength={maxLength == 0 ? 100 : maxLength}
@@ -34,5 +35,6 @@ const styles = StyleSheet.create({
     height: 40,
     marginVertical: 10,
     paddingHorizontal: 5,
+    color: 'white',
   },
 });
