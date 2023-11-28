@@ -15,17 +15,15 @@ import {ActiveCardAndColor} from '../components/ActiveCardAndColor';
 import {ActionButtons} from '../components/ActionButtons';
 import {ShowRank} from '../components/ShowRank';
 import {GameCompleted} from '../components/GameCompleted';
-import {ChallengeOptions} from '../components/ChallengeOptions';
 
 const screenWidth = Dimensions.get('window').width;
 
-export const Game = ({tableId, setTableId}) => {
+export const SelfCardsAndActions = ({tableId, setTableId}) => {
   const {stompClient, userName} = useUser();
   const [table, setTable] = useState();
   const [myIndex, setMyIndex] = useState();
   const [myCards, setMyCards] = useState();
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showChallengeOptions, setShowChallengeOptions] = useState(false);
   const [card, setCard] = useState();
   const [messageReceived, setMessageReceived] = useState('');
 
@@ -65,11 +63,6 @@ export const Game = ({tableId, setTableId}) => {
       players.forEach(player => {
         if (player.name == userName) {
           setMyIndex(player.id);
-          if (player.id == table.activePlayerIndex && table.challengeActive) {
-            setShowChallengeOptions(true);
-          } else {
-            setShowChallengeOptions(false);
-          }
         }
       });
       setMessageReceived('');
@@ -212,14 +205,6 @@ export const Game = ({tableId, setTableId}) => {
     stompClient.send(`/app/restartGame/${tableId}`, {}, {});
   };
 
-  const challengeDraw4 = () => {
-    stompClient.send(`/app/challengeDraw4/${tableId}`, {}, {});
-  };
-
-  const draw4Cards = () => {
-    stompClient.send(`/app/draw4Cards/${tableId}`, {}, {});
-  };
-
   if (table == undefined)
     return (
       <View style={styles.container}>
@@ -263,19 +248,12 @@ export const Game = ({tableId, setTableId}) => {
       {/* showing self cards and buttons */}
       <View style={styles.myCardsStyle}>
         {showColorPicker && <ColorPicker colorChoosen={colorChoosen} />}
-        {showChallengeOptions && (
-          <ChallengeOptions
-            challenge={challengeDraw4}
-            drawCards={draw4Cards}
-            previousColor={table.previousColor}
-          />
-        )}
         {myIndex != undefined && myIndex == table.activePlayerIndex && (
           <Text style={{color: 'white', marginBottom: 5, fontSize: 15}}>
             Your turn
           </Text>
         )}
-        {!showChallengeOptions && <ActionButtons actionButton={actionButton} />}
+        <ActionButtons actionButton={actionButton} />
 
         <ScrollView
           horizontal
