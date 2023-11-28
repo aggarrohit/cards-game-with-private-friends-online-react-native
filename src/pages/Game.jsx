@@ -6,8 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  Platform,
-  ToastAndroid,
 } from 'react-native';
 import {useUser} from '../state/UserContext';
 import {Card} from '../components/Card';
@@ -18,38 +16,29 @@ import {ActionButtons} from '../components/ActionButtons';
 import {ShowRank} from '../components/ShowRank';
 import {GameCompleted} from '../components/GameCompleted';
 
-export const Game = ({tableId, setTableId}) => {
-  const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+const screenWidth = Dimensions.get('window').width;
 
+export const Game = ({tableId, setTableId}) => {
   const {stompClient, userName} = useUser();
   const [table, setTable] = useState();
   const [myIndex, setMyIndex] = useState();
   const [myCards, setMyCards] = useState();
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [card, setCard] = useState();
+  const [messageReceived, setMessageReceived] = useState('');
 
   useEffect(() => {
     if (stompClient) {
       stompClient.subscribe(
         `/user/${userName}/queue/private-message`,
         function (message) {
-          console.log('received message in personal : ' + message.body);
-          if (Platform.OS == 'android') {
-            ToastAndroid.show(
-              message.body,
-              ToastAndroid.SHORT,
-              ToastAndroid.CENTER,
-            );
-          } else {
-            alert(message.body);
-          }
+          setMessageReceived(message.body);
         },
       );
 
       stompClient.subscribe(
         `/user/${userName}/queue/my-cards`,
         function (message) {
-          console.log('received message in personal my-cards: ' + message.body);
           updateCards(message.body);
         },
       );
@@ -57,14 +46,9 @@ export const Game = ({tableId, setTableId}) => {
       stompClient.subscribe(
         `/table/${tableId}/table-updates`,
         function (tableMessage) {
-          console.log('received table  update : ' + tableMessage.body);
           updateTable(tableMessage.body);
         },
       );
-
-      stompClient.subscribe(`/table/${tableId}`, function (tableMessage) {
-        console.log('received message in table : ' + tableMessage.body);
-      });
     }
   }, [stompClient]);
 
@@ -81,12 +65,12 @@ export const Game = ({tableId, setTableId}) => {
           setMyIndex(player.id);
         }
       });
+      setMessageReceived('');
     }
   }, [table]);
 
   const updateTable = tableString => {
     try {
-      console.log('tableString : ' + tableString);
       const tableObject = JSON.parse(tableString);
       setTable({...tableObject});
     } catch (error) {
@@ -107,11 +91,62 @@ export const Game = ({tableId, setTableId}) => {
     let otherPlayer;
 
     table.playersCommons.forEach(player => {
-      if (player.name != userName) {
+      if (player.id == getTopPlayerId()) {
         otherPlayer = player;
       }
     });
     return otherPlayer.deckSize;
+  };
+
+  const getUserWithId = id => {
+    let user;
+    table.playersCommons.forEach(player => {
+      if (player.id == id) {
+        user = player;
+      }
+    });
+    return user;
+  };
+
+  const getTopPlayerId = () => {
+    let myId;
+    table.playersCommons.forEach(player => {
+      if (player.name == userName) {
+        myId = player.id;
+      }
+    });
+    if (table.playersCommons.length == 2) {
+      return myId == 0 ? 1 : 0;
+    } else if (table.playersCommons.length == 3) {
+      return myId == 0 ? 2 : myId == 1 ? 0 : 1;
+    } else if (table.playersCommons.length == 4) {
+      return myId == 0 ? 2 : myId == 1 ? 3 : myId == 2 ? 0 : 1;
+    }
+  };
+
+  const getLeftPlayerId = () => {
+    let myId;
+    table.playersCommons.forEach(player => {
+      if (player.name == userName) {
+        myId = player.id;
+      }
+    });
+    if (table.playersCommons.length == 3) {
+      return myId == 0 ? 1 : myId == 1 ? 2 : 0;
+    } else if (table.playersCommons.length == 4) {
+      return myId == 0 ? 1 : myId == 1 ? 2 : myId == 2 ? 3 : 0;
+    }
+  };
+
+  const getRightPlayerId = () => {
+    let myId;
+    table.playersCommons.forEach(player => {
+      if (player.name == userName) {
+        myId = player.id;
+      }
+    });
+
+    return myId == 0 ? 3 : myId == 1 ? 0 : myId == 2 ? 1 : 2;
   };
 
   const getTopPlayer = () => {
@@ -119,7 +154,7 @@ export const Game = ({tableId, setTableId}) => {
     let otherPlayer;
 
     table.playersCommons.forEach(player => {
-      if (player.name != userName) {
+      if (player.id == getTopPlayerId()) {
         otherPlayer = player;
       }
     });
@@ -187,10 +222,19 @@ export const Game = ({tableId, setTableId}) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.message}>{messageReceived}</Text>
       <ActiveCardAndColor table={table} />
+
+      {/* showing top player deck size and name */}
       <View style={styles.topCardsStyle}>
-        {getTopPlayer().deckSize > 0 ? (
-          <ScrollView horizontal>
+        {getTopPlayer() == undefined ? (
+          <Text style={{color: 'red'}}>error</Text>
+        ) : getTopPlayer().deckSize > 0 ? (
+          <ScrollView
+            horizontal
+            style={
+              getTopPlayer().id == table.activePlayerIndex && styles.highLight
+            }>
             {getRawArray(getTopPlayerDeckSize()).map((card, index) => {
               return <CardBacks key={index} index={index} place={'top'} />;
             })}
@@ -198,15 +242,10 @@ export const Game = ({tableId, setTableId}) => {
         ) : (
           <ShowRank rank={getTopPlayer().rank} />
         )}
-        <Text
-          style={{
-            color: 'white',
-            textAlign: 'center',
-          }}>
-          {getTopPlayer().name}
-        </Text>
+        <Text style={styles.playerName}>{getTopPlayer().name}</Text>
       </View>
 
+      {/* showing self cards and buttons */}
       <View style={styles.myCardsStyle}>
         {showColorPicker && <ColorPicker colorChoosen={colorChoosen} />}
         {myIndex != undefined && myIndex == table.activePlayerIndex && (
@@ -216,7 +255,11 @@ export const Game = ({tableId, setTableId}) => {
         )}
         <ActionButtons actionButton={actionButton} />
 
-        <ScrollView horizontal>
+        <ScrollView
+          horizontal
+          style={
+            getMyPlayer().id == table.activePlayerIndex && styles.highLight
+          }>
           {myCards &&
             myCards.map((card, index) => {
               return (
@@ -231,28 +274,63 @@ export const Game = ({tableId, setTableId}) => {
         )}
       </View>
 
+      {/* shows left and right players */}
       <View
         style={{
           flex: 1,
           flexDirection: 'row',
           justifyContent: 'space-between',
           position: 'absolute',
-          // backgroundColor: 'red',
           width: screenWidth,
         }}>
+        {/* shows left player deck size and name */}
         <View>
-          <ScrollView>
-            {getRawArray(2).map((card, index) => {
-              return <CardBacks key={index} index={index} place={'left'} />;
-            })}
+          <ScrollView
+            style={
+              getLeftPlayerId() == table.activePlayerIndex && styles.highLight
+            }>
+            {table.playersCommons.length > 2 &&
+              getRawArray(getUserWithId(getLeftPlayerId()).deckSize).map(
+                (card, index) => {
+                  return <CardBacks key={index} index={index} place={'left'} />;
+                },
+              )}
           </ScrollView>
+          {table.playersCommons.length > 2 &&
+            getUserWithId(getLeftPlayerId()).rank != 0 && (
+              <ShowRank rank={getUserWithId(getLeftPlayerId()).rank} />
+            )}
+          {table.playersCommons.length > 2 && (
+            <Text style={styles.playerName}>
+              {getUserWithId(getLeftPlayerId()).name}
+            </Text>
+          )}
         </View>
+
+        {/* shows right player deck size and name */}
         <View>
-          <ScrollView>
-            {getRawArray(getTopPlayerDeckSize()).map((card, index) => {
-              return <CardBacks key={index} index={index} place={'right'} />;
-            })}
+          <ScrollView
+            style={
+              getRightPlayerId() == table.activePlayerIndex && styles.highLight
+            }>
+            {table.playersCommons.length > 3 &&
+              getRawArray(getUserWithId(getRightPlayerId()).deckSize).map(
+                (card, index) => {
+                  return (
+                    <CardBacks key={index} index={index} place={'right'} />
+                  );
+                },
+              )}
           </ScrollView>
+          {table.playersCommons.length > 3 &&
+            getUserWithId(getRightPlayerId()).rank != 0 && (
+              <ShowRank rank={getUserWithId(getRightPlayerId()).rank} />
+            )}
+          {table.playersCommons.length > 3 && (
+            <Text style={styles.playerName}>
+              {getUserWithId(getRightPlayerId()).name}
+            </Text>
+          )}
         </View>
       </View>
     </View>
@@ -276,5 +354,25 @@ const styles = StyleSheet.create({
   topCardsStyle: {
     position: 'absolute',
     top: 0,
+  },
+  message: {
+    color: 'white',
+    position: 'absolute',
+    fontSize: 20,
+    top: screenWidth - 200,
+    zIndex: 12,
+  },
+  highLight: {
+    borderColor: 'lime',
+    borderWidth: 5,
+    borderRadius: 15,
+  },
+  playerName: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: '800',
+    fontSize: 17,
+    textTransform: 'capitalize',
+    marginTop: 5,
   },
 });

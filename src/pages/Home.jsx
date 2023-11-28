@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Button, StyleSheet, Image} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {useUser} from '../state/UserContext';
 import {InputView} from '../components/InputView';
 import {Game} from './Game';
@@ -15,24 +15,11 @@ export const Home = () => {
       stompClient.subscribe(
         `/user/${userName}/callback/tableid`,
         function (message) {
-          console.log('callback/tableid : ' + message.body);
           setTableId(message.body);
         },
       );
     }
   }, [stompClient]);
-
-  const sendTestMessage = () => {
-    stompClient.send(
-      `/app/subscribeToTable/${roomId}`,
-      {},
-      JSON.stringify({
-        content: 'test content',
-        sender: '',
-        type: 'CREATE_ROOM',
-      }),
-    );
-  };
 
   const createTable = () => {
     stompClient.send(
@@ -48,7 +35,6 @@ export const Home = () => {
 
   const connectToRoom = id => {
     const tableId = typeof id == 'string' ? id : roomId;
-    console.log('connect to room: ' + tableId);
     stompClient.send(
       `/app/subscribeToTable/${tableId}`,
       {},
@@ -59,12 +45,6 @@ export const Home = () => {
       }),
     );
     setTableId(tableId);
-    // stompClient.subscribe(
-    //   `/table/${typeof id == 'string' ? id : roomId}`,
-    //   function (tableMessage) {
-    //     console.log('received message in table : ' + tableMessage.body);
-    //   },
-    // );
   };
 
   if (tableId) return <Game tableId={tableId} setTableId={setTableId} />;
@@ -92,10 +72,6 @@ export const Home = () => {
           action={createTable}
           actionTitle={'Create Room'}
         />
-        {/* <Text>Create Room</Text>
-        <Button onPress={() => createTable()} title="Create Room"></Button>
-        <View style={{height: 20}}></View>
-        <Button onPress={() => sendTestMessage()} title="send msg"></Button> */}
       </View>
     </View>
   );

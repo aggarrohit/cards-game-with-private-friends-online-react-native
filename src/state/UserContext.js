@@ -23,12 +23,10 @@ export function UserProvider({children}) {
     stompClient.connect(
       {},
       function (frame) {
-        console.log('Connected: ' + frame);
         setConnected(true);
         setStompClient(stompClient);
       },
       () => {
-        console.log('error disconnected callback');
         setConnected(false);
       },
     );

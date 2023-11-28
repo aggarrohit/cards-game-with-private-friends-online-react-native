@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {View, Text, Button, TextInput, StyleSheet, Image} from 'react-native';
+import React from 'react';
+import {StyleSheet, Image} from 'react-native';
 
 export const Card = ({card, index}) => {
   const images = {
@@ -86,29 +86,4 @@ export const Card = ({card, index}) => {
   );
 };
 
-const styles = StyleSheet.create({
-  card: {
-    height: 105,
-    width: 75,
-    marginBottom: 20,
-    borderWidth: 5,
-    borderColor: 'white',
-    borderRadius: 10,
-  },
-  cardText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: 'white',
-    marginLeft: 5,
-    elevation: 5,
-    shadowColor: 'black',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: {width: 2, height: 2},
-    textShadowRadius: 5,
-  },
-  cardTextBottom: {
-    position: 'absolute',
-    bottom: 5,
-    right: 5,
-  },
-});
+const styles = StyleSheet.create({});

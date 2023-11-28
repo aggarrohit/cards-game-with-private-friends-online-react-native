@@ -6,12 +6,7 @@ export const ColorPicker = ({colorChoosen}) => {
   return (
     <View style={{width: '80%', marginBottom: 10}}>
       <Text style={{color: 'white', marginVertical: 2}}>Pick Color</Text>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-        }}>
+      <View style={styles.colorRow}>
         <ColorCircle backgroundColor={'red'} colorChoosen={colorChoosen} />
         <ColorCircle backgroundColor={'yellow'} colorChoosen={colorChoosen} />
         <ColorCircle backgroundColor={'blue'} colorChoosen={colorChoosen} />
@@ -27,5 +22,10 @@ const styles = StyleSheet.create({
     width: 'auto',
     paddingHorizontal: 20,
     paddingVertical: 5,
+  },
+  colorRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
 });
