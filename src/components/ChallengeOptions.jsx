@@ -3,7 +3,12 @@ import {Text, StyleSheet, View} from 'react-native';
 import {ColorCircle} from './ColorCircle';
 import {ActionButton} from './ActionButton';
 
-export const ChallengeOptions = ({drawCards, challenge, previousColor}) => {
+export const ChallengeOptions = ({
+  drawCards,
+  challenge,
+  previousColor,
+  numberOfAccumulatedCards,
+}) => {
   const colorChoosen = () => {
     alert('This was the color of previous card!');
   };
@@ -15,7 +20,7 @@ export const ChallengeOptions = ({drawCards, challenge, previousColor}) => {
         <ActionButton
           backgroundColor={'red'}
           onPress={drawCards}
-          title={'Pick 4 Cards'}
+          title={`Pick ${numberOfAccumulatedCards + 4} Cards`}
         />
         <ColorCircle
           backgroundColor={

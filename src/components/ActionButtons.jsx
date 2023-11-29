@@ -2,13 +2,17 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {ActionButton} from './ActionButton';
 
-export const ActionButtons = ({actionButton}) => {
+export const ActionButtons = ({actionButton, numberOfAccumulatedCards}) => {
   return (
     <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
       <ActionButton
         backgroundColor={'orange'}
         onPress={() => actionButton('pickCard')}
-        title={'Pick Card'}
+        title={
+          numberOfAccumulatedCards == 0
+            ? 'Pick Card'
+            : `Pick ${numberOfAccumulatedCards} Cards`
+        }
       />
       <ActionButton
         backgroundColor={'gray'}

@@ -12,7 +12,7 @@ export const GameCompleted = ({table, restartGame, home}) => {
           <View key={index} style={styles.playerRow}>
             <Text style={styles.playerTitle}>{player.name}</Text>
             <Text style={styles.playerRank}>
-              {player.rank == 0 ? 'Loose' : player.rank}
+              {player.rank == 0 ? 'Lose' : player.rank}
             </Text>
           </View>
         );

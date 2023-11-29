@@ -95,6 +95,7 @@ export const SelfCardsAndActions = ({
           challenge={challengeDraw4}
           drawCards={draw4Cards}
           previousColor={table.previousColor}
+          numberOfAccumulatedCards={table.numberOfAccumulatedCards}
         />
       )}
       {myIndex != undefined && myIndex == table.activePlayerIndex && (
@@ -102,7 +103,12 @@ export const SelfCardsAndActions = ({
           Your turn
         </Text>
       )}
-      {!showChallengeOptions && <ActionButtons actionButton={actionButton} />}
+      {!showChallengeOptions && (
+        <ActionButtons
+          actionButton={actionButton}
+          numberOfAccumulatedCards={table.numberOfAccumulatedCards}
+        />
+      )}
 
       <ScrollView
         horizontal
