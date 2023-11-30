@@ -46,7 +46,7 @@ export function UserProvider({children}) {
 export function useUser() {
   const context = useContext(Context);
   const errorText =
-    'To use useUser(), you need to wrap the parent component with <UserProvider/>';
+    'To use useUser(), wrap the parent component with <UserProvider/>';
 
   // Safeguards
   if (!context) throw new Error(errorText);
